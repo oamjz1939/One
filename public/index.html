@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One Storage</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="logo-area">
+        <img src="logo.png" alt="One Storage Logo" class="logo-img">
+        <span class="logo-title">One Storage</span>
+        <div class="nav-status" id="ws-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">连接中</span>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-tonal btn-sm" id="btn-devices">设备</button>
+        <button class="btn btn-tonal btn-sm" id="btn-change-pwd">改密</button>
+        <button class="btn btn-outline btn-sm" id="btn-logout">锁定</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主应用区域 -->
+  <main class="container main-container">
+    <div class="main-grid">
+      
+      <!-- 左侧：文本 -->
+      <section class="surface-card">
+        <div class="card-header">
+          <h2 class="card-title">文本</h2>
+          <div class="card-header-actions">
+            <button class="btn btn-tonal btn-sm" id="btn-copy-notepad">复制</button>
+            <button class="btn btn-danger-text btn-sm" id="btn-clear-notepad">清空</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="notepad-container">
+            <textarea 
+              id="notepad-input" 
+              class="notepad-textarea" 
+              placeholder="在此输入或粘贴文本..."
+              spellcheck="false"
+            ></textarea>
+            <div class="notepad-footer">
+              <span id="notepad-char-count">0 字</span>
+              <span class="sync-badge" id="notepad-sync-status">
+                <span class="dot-indicator"></span> 已同步
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右侧：文件 -->
+      <section class="surface-card">
+        <div class="card-header">
+          <h2 class="card-title">文件</h2>
+        </div>
+        <div class="card-body">
+          
+          <!-- 上传拖拽区域 -->
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" multiple style="display: none;">
+            <div class="dropzone-text">点击或拖拽文件至此</div>
+            <div class="dropzone-hint">支持粘贴截图或文件</div>
+          </div>
+
+          <!-- 上传进度条 -->
+          <div class="upload-progress-container" id="upload-progress">
+            <div class="progress-header">
+              <span id="upload-filename">正在上传...</span>
+              <div class="progress-actions">
+                <span id="upload-percentage">0%</span>
+                <button type="button" class="btn btn-danger-text btn-sm" id="btn-cancel-upload" title="取消上传">取消</button>
+              </div>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- 文件列表区域 -->
+          <div class="file-list-header">
+            <span class="file-list-title">已存文件 (<span id="file-count">0</span>)</span>
+            <div class="file-list-header-actions">
+              <button class="btn btn-text btn-sm" id="btn-refresh-files">刷新</button>
+              <button class="btn btn-danger-text btn-sm" id="btn-clear-all-files" disabled title="清空全部已存文件">全部删除</button>
+            </div>
+          </div>
+
+          <div class="file-list" id="file-list">
+            <!-- 动态渲染文件列表 -->
+            <div class="empty-state" id="empty-state">
+              暂无文件
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 锁屏密码输入弹窗 -->
+  <div class="lock-screen" id="lock-screen" style="display: none;">
+    <div class="lock-card" id="lock-card">
+      <div class="lock-logo-wrapper">
+        <img src="logo.png" alt="One Storage Logo" class="lock-logo-img">
+      </div>
+      <h1 class="lock-title">One Storage</h1>
+      
+      <form id="login-form">
+        <input 
+          type="password" 
+          id="password-input" 
+          class="lock-input" 
+          placeholder="访问密码" 
+          autocomplete="current-password"
+          required
+        />
+        <button type="submit" class="btn btn-primary btn-full">
+          进入
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 信任设备管理弹窗 -->
+  <div class="modal-backdrop" id="devices-modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">已登录设备</h3>
+        <button class="btn btn-icon" id="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body" id="devices-list">
+        <!-- 动态渲染设备列表 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger-tonal btn-sm" id="btn-revoke-others">
+          踢出其他设备
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改密码弹窗 -->
+  <div class="modal-backdrop" id="change-pwd-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">修改访问密码</h3>
+        <button class="btn btn-icon" id="btn-close-pwd-modal">✕</button>
+      </div>
+      <form id="change-pwd-form">
+        <div class="modal-body" style="gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="old-pwd-input">原密码</label>
+            <input 
+              type="password" 
+              id="old-pwd-input" 
+              class="form-input" 
+              placeholder="请输入当前原密码" 
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-pwd-input">新密码</label>
+            <input 
+              type="password" 
+              id="new-pwd-input" 
+              class="form-input" 
+              placeholder="请输入新密码" 
+              required
+              autocomplete="new-password"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirm-pwd-input">确认新密码</label>
+            <input 
+              type="password" 
+              id="confirm-pwd-input" 
+              class="form-input" 
+              placeholder="请再次输入新密码" 
+              required
+              autocomplete="new-password"
+            />
+          </div>
+        </div>
+        <div class="modal-footer" style="gap: 0.5rem;">
+          <button type="button" class="btn btn-tonal btn-sm" id="btn-cancel-pwd">取消</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-pwd">确认修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 全局 Toast 提示容器 -->
+  <div id="toast-container"></div>
+
+  <!-- 脚本加载 -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
