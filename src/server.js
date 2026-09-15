@@ -51,7 +51,7 @@ const cleanupTimer = startCleanupJob(5);
 // 启动 HTTP 监听
 server.listen(config.PORT, '0.0.0.0', () => {
   console.log(`=========================================`);
-  console.log(`One Storage 服务已启动`);
+  console.log(`One 服务已启动`);
   console.log(`访问地址: http://localhost:${config.PORT}`);
   console.log(`文件过期: ${config.FILE_EXPIRE_HOURS} 小时`);
   console.log(`设备免密: ${config.SESSION_EXPIRE_DAYS} 天`);
